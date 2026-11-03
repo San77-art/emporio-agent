@@ -14,5 +14,4 @@ Every transcript lists the tools the model called and their raw results, so you 
 number the agent stated against the data. The script also asserts that the expected tools were used
 and that key facts appear in the answers (exit code ≠ 0 otherwise).
 
-The store clock is pinned per scenario (`now`) so the results are reproducible: the dataset's
-orders end in March 2026, so scenarios about order status/returns use dates in that window.
+The store clock is pinned per scenario (`now`), so the facts (dates, windows, prices) are reproducible; the model's exact wording varies between runs. The dataset's orders end in March 2026, so scenarios about order status/returns use dates in that window.

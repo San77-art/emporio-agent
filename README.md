@@ -8,7 +8,7 @@ A text-message agent ("**Dó**", the store's virtual assistant) for *Empório da
 - Every number the agent states (promo price, PIX discount, instalments, shipping fee, store hours, return windows) is computed in code (`business.py`), never by the model.
 - Data problems are handled explicitly and documented: [`docs/data_quality.md`](docs/data_quality.md).
 - Privacy by design (LGPD): orders are only shown after an identity check; lockout after 3 failures; no order-number enumeration.
-- 82 automated tests that run **without an API key** (fake model + real data and manual).
+- 88 automated tests that run **without an API key** (fake model + real data and manual).
 - Provider-agnostic: Claude by default, any OpenAI-compatible endpoint (OpenAI, Ollama, Groq, Gemini-compat…) via one env var.
 
 ---
@@ -18,8 +18,10 @@ A text-message agent ("**Dó**", the store's virtual assistant) for *Empório da
 Requires Python ≥ 3.10.
 
 ```bash
-git clone <this-repo> && cd emporio-agent
-python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+git clone https://github.com/San77-art/emporio-agent.git && cd emporio-agent
+python -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+.venv\Scripts\Activate.ps1       # Windows (PowerShell)
 pip install -r requirements.txt
 
 cp .env.example .env                                   # then put your key in .env
@@ -33,7 +35,7 @@ In the chat: `/nova` starts a fresh conversation, `/sair` quits. Conversations a
 
 | Command | What it does |
 |---|---|
-| `pytest -q` | 82 tests, no API key needed |
+| `pytest -q` | 88 tests, no API key needed |
 | `python scripts/record_examples.py` | runs the 5 scripted scenarios against the real model and writes `examples/*.md` |
 | `python -m emporio data-report` | regenerates the data-quality report |
 
@@ -105,10 +107,10 @@ The brief lists RAG, function calling, ReAct, SQL agents or hybrids. I chose **f
 - **Why not "everything in the prompt"?** Possible at this size, but it would give up exactness (LLM arithmetic), auditability and privacy, and would not scale.
 
 ### 2. Model and provider: Claude through the Anthropic API (default), adapter for anything OpenAI-compatible
-- Strong tool use and Brazilian-Portuguese quality, good instruction following for a persona with strict rules. Default `claude-sonnet-5-5`; `claude-haiku-5-5` is the cheaper/faster option for this workload (`LLM_MODEL`). Temperature 0.3: consistent tone with a bit of natural variation.
+- Strong tool use and Brazilian-Portuguese quality, good instruction following for a persona with strict rules. Default `claude-sonnet-5-5`; `claude-haiku-5-5` is the cheaper/faster option for this workload (`LLM_MODEL`). Sampling parameters are left at the model defaults for Claude (recent SDK/model versions reject `temperature`; the provider also retries without it); the OpenAI-compatible adapter defaults to 0.3. `LLM_TEMPERATURE` overrides both.
 - **Prompt caching:** the long, stable system prompt and the tool schemas are marked cacheable; only a one-line "AGORA: time, open/closed" block changes per request.
 - **No lock-in:** the agent speaks one canonical message format; `llm/openai_provider.py` translates it to Chat Completions, so free/local models (Ollama) work too. Both adapters are unit-tested against fake SDK clients.
-- Honest caveat: I could only verify the deterministic layers offline; recorded conversations come from running `scripts/record_examples.py` with a real key.
+- Model behaviour (tone, tool choice, refusals) is checked with scenarios recorded against the real API (`scripts/record_examples.py`), not with an automated eval; see Known limitations.
 
 ### 3. Interface: CLI (+ one-shot `ask`)
 The brief says the focus is the agent working correctly. `Agent.reply(text)` is channel-agnostic, so a WhatsApp Business webhook or FastAPI endpoint is a thin wrapper around it (see next steps).
@@ -168,7 +170,7 @@ The manual contradicts itself in places; the decisions are in `prompts.py` and `
 
 ## Testing
 
-`pytest -q` → 82 tests, ~2 s, no network:
+`pytest -q` → 88 tests, ~2 s, no network:
 - **Business rules:** instalments at every threshold, PIX vs promo, shipping boundary (R$500.00 vs R$500.01), store hours incl. holidays/Easter-based dates, return-window boundaries (day 7/8, 30/31, 90/91).
 - **Data & policies:** counts, derived availability, the exact set of 7 unreliable descriptions, manual parsing, 13 retrieval questions.
 - **Tools:** price lookups, filters on promotional prices, typo tolerance, sold-out → alternatives, withheld descriptions, **order privacy** (verification, no enumeration, lockout, no PII), delayed shipments, hand-off tickets.
@@ -187,7 +189,6 @@ What these do *not* prove is the model's behaviour (tone, whether it chooses the
 4. **Non-trivial:** order tracking with identity check and a delivery 23 days late
 5. Store info on a Sunday (open/closed, address) + accessories + out-of-scope request
 
-<!-- TODO before submitting: run `python scripts/record_examples.py` and commit examples/0*.md -->
 
 ## Known limitations
 
@@ -220,14 +221,14 @@ I used **Claude (Anthropic)** — the claude.ai chat with agentic file/shell too
 
 I take responsibility for the final code and the decisions documented here.
 
-<!-- Add here, in your own words, what you reviewed/changed and anything you would do differently. -->
+What I did myself: I set the project up and ran it locally on Windows, read the code and the data audit, ran the real-model scenarios, and diagnosed the problems that appeared (the Anthropic SDK rejecting `temperature`, the prompt wording about return windows, a scenario script that assumed a sender phone number) before committing each fix separately. With more time I would build the LLM-judged eval harness first, since it is the main gap in how model behaviour is validated.
 
 ## Project layout
 
 ```
 data/                CSVs + políticas (politicas_da_loja.pdf)  — the challenge inputs
 src/emporio/         agent, tools, business rules, policies, LLM adapters, CLI
-tests/               82 tests (no network)
+tests/               88 tests (no network)
 scripts/             record_examples.py (real-model transcripts)
 examples/            scenarios.json + recorded conversations
 docs/data_quality.md generated audit of the CSVs and the manual

@@ -25,7 +25,7 @@
     "turns": [
       "Me arrependi da minha compra, posso devolver meu pedido?",
       "É o pedido 7. Os 4 últimos dígitos do meu telefone são 0123.",
-      "Foi online sim. Quero seguir com a devolução. Meu nome é Letícia e pode me chamar nesse mesmo número."
+            "Foi online sim. Quero seguir com a devolução. Meu nome é Letícia e pode me chamar neste número: (67) 99789-0123."
     ],
     "expect_tools": ["search_policies", "lookup_order", "escalate_to_human"],
     "expect_text": ["H-20260220-"]

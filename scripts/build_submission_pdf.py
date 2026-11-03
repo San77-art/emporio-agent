@@ -73,7 +73,7 @@ def build(repo_url: str | None, out_dir: Path) -> Path:
         "Orders: totals that do not match items, historical instalments below the manual's minimum, no real delivery date: documented, never silently changed.",
     ]), Paragraph("How to run", h2), Paragraph(
         "pip install -r requirements.txt<br/>cp .env.example .env &nbsp;# set ANTHROPIC_API_KEY<br/>python -m emporio chat --verbose<br/>"
-        "pytest -q &nbsp;# 82 tests, no API key needed<br/>python scripts/record_examples.py &nbsp;# regenerates examples/", mono),
+        "pytest -q &nbsp;# 88 tests, no API key needed<br/>python scripts/record_examples.py &nbsp;# regenerates examples/", mono),
         Paragraph("Known limitations and next steps", h2), bullets([
             "Model behaviour is validated by recorded scenarios, not yet by an automated LLM-judged eval suite (first next step).",
             "Identity check (last 4 phone digits) is weak for production: use WhatsApp sender matching and/or OTP.",
