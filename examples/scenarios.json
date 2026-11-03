@@ -1,0 +1,57 @@
+[
+  {
+    "id": "01-preco-e-parcelamento",
+    "title": "Price + payment options for a specific model",
+    "description": "Specific product question. The agent must query the catalog (not answer from memory) and quote the exact price, PIX price and instalments computed by the tools.",
+    "now": "2026-11-03T10:30",
+    "turns": ["Oi! Quanto custa o Takamine GD20? Dá pra parcelar?"],
+    "expect_tools": ["search_products"],
+    "expect_text": ["2.199,00"]
+  },
+  {
+    "id": "02-violoes-ate-1000",
+    "title": "Catalog browsing with a budget",
+    "description": "Open-ended recommendation with filters (category + max price). Sold-out and discontinued models must not be offered as available.",
+    "now": "2026-11-03T10:30",
+    "turns": ["Quais opções de violões disponíveis custando até R$1000?"],
+    "expect_tools": ["search_products"],
+    "expect_text": []
+  },
+  {
+    "id": "03-arrependimento-pedido",
+    "title": "Return request: order data + policy + human hand-off",
+    "description": "Non-trivial case. The agent explains the regret policy, verifies identity, looks up the order, applies the 7-day window against the delivery date (store time pinned to 2026-02-20, 3 days after the estimated delivery of order 7) and opens a ticket because it cannot process refunds itself.",
+    "now": "2026-02-20T10:00",
+    "turns": [
+      "Me arrependi da minha compra, posso devolver meu pedido?",
+      "É o pedido 7. Os 4 últimos dígitos do meu telefone são 0123.",
+      "Foi online sim. Quero seguir com a devolução. Meu nome é Letícia e pode me chamar nesse mesmo número."
+    ],
+    "expect_tools": ["search_policies", "lookup_order", "escalate_to_human"],
+    "expect_text": ["H-20260220-"]
+  },
+  {
+    "id": "04-pedido-atrasado",
+    "title": "Order tracking with identity check and a late delivery",
+    "description": "Privacy flow: no order data before verification. Order 8 is shipped and 23 days past its estimate (store time pinned to 2026-03-23); the agent must apologise, give the tracking code and offer a human follow-up.",
+    "now": "2026-03-23T10:00",
+    "turns": [
+      "Oi, cadê meu pedido 8? Já passou do prazo!",
+      "Os 4 últimos dígitos do meu telefone são 7821."
+    ],
+    "expect_tools": ["lookup_order"],
+    "expect_text": ["BRJL5544332BR"]
+  },
+  {
+    "id": "05-endereco-horario-fora-de-escopo",
+    "title": "Store info on a Sunday + accessories and out-of-scope requests",
+    "description": "Hours/address come from the fixed store card and the clock line (Sunday 11:00: closed, reopens Monday 09:00). Then an accessory request (store sells instruments only) and an unrelated request that must be declined politely.",
+    "now": "2026-11-08T11:00",
+    "turns": [
+      "Bom dia! Vocês estão abertos agora? Qual o endereço?",
+      "Vocês vendem corda de violão? Aproveitando, me ajuda a declarar meu imposto de renda?"
+    ],
+    "expect_tools": [],
+    "expect_text": ["Rua 14 de Maio"]
+  }
+]
