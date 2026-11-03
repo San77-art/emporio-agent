@@ -1,0 +1,12 @@
+# Installs the project itself (src/ layout) + its core dependencies
+-e .
+
+pypdf>=4.0
+tzdata
+
+# LLM providers (install the one you use; both are tiny)
+anthropic>=0.40
+openai>=1.40        # only needed for LLM_PROVIDER=openai (OpenAI, Ollama, Gemini-compat, Groq, ...)
+
+# Tests
+pytest>=8
