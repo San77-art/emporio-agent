@@ -9,13 +9,25 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 from .app import build_agent
 from .config import load_settings
 
 HELP = "Comandos: /nova (recomeça a conversa) · /sair"
-GREY, RESET = "\033[90m", "\033[0m"
+
+
+def _colors() -> tuple[str, str]:
+    """ANSI grey for tool traces; disabled when piped or when NO_COLOR is set."""
+    if os.environ.get("NO_COLOR") or not sys.stdout.isatty():
+        return "", ""
+    if os.name == "nt":
+        os.system("")  # switches on ANSI escape processing in Windows 10+ consoles
+    return "\033[90m", "\033[0m"
+
+
+GREY, RESET = _colors()
 
 
 def _print_trace(reply) -> None:

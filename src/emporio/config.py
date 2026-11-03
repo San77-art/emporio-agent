@@ -58,14 +58,20 @@ def load_settings(**overrides) -> Settings:
     if provider not in DEFAULT_MODELS:
         raise ValueError(f"LLM_PROVIDER must be one of {sorted(DEFAULT_MODELS)}, got {provider!r}")
 
-    temp_raw = os.environ.get("LLM_TEMPERATURE", "0.3").strip()
+    # Temperature: omitted by default for Claude (recent models/SDKs no longer accept the parameter);
+    # 0.3 by default for OpenAI-compatible endpoints. LLM_TEMPERATURE overrides; empty = omit.
+    temp_raw = os.environ.get("LLM_TEMPERATURE")
+    if temp_raw is None:
+        temperature = 0.3 if provider == "openai" else None
+    else:
+        temperature = float(temp_raw) if temp_raw.strip() else None
     values = dict(
         data_dir=Path(os.environ.get("EMPORIO_DATA_DIR", ROOT / "data")),
         state_dir=Path(os.environ.get("EMPORIO_STATE_DIR", ROOT / ".state")),
         provider=provider,
         model=os.environ.get("LLM_MODEL", "").strip() or DEFAULT_MODELS[provider],
         max_tokens=int(os.environ.get("LLM_MAX_TOKENS", "1024")),
-        temperature=float(temp_raw) if temp_raw else None,
+        temperature=temperature,
         now_override=os.environ.get("STORE_NOW", "").strip() or None,
     )
     values.update(overrides)

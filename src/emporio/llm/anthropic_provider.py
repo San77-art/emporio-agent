@@ -30,7 +30,16 @@ class AnthropicProvider:
         kwargs = dict(model=self.model, max_tokens=max_tokens, system=system_blocks, tools=tool_defs, messages=messages)
         if self.temperature is not None:
             kwargs["temperature"] = self.temperature
-        resp = self.client.messages.create(**kwargs)
+        try:
+            resp = self.client.messages.create(**kwargs)
+        except TypeError as exc:
+            # Newer SDK/model combinations dropped sampling parameters: retry once without it.
+            if "temperature" in kwargs and "temperature" in str(exc):
+                kwargs.pop("temperature")
+                self.temperature = None
+                resp = self.client.messages.create(**kwargs)
+            else:
+                raise
 
         content: list[dict] = []
         for block in resp.content:
