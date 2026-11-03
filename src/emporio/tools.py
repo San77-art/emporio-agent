@@ -381,7 +381,12 @@ class ToolRegistry:
             alerts.append("Não há informação de estorno no sistema: não prometa prazo; se o cliente perguntar, ofereça encaminhar à equipe.")
         if order.status == "delivered" and order.estimated_delivery:
             out["return_windows"] = {
-                "basis": "O sistema não registra a data real de entrega; usada a data estimada como referência.",
+                "basis": (
+                    "A data real de entrega não é registrada; o cálculo usa a data de entrega estimada do pedido "
+                    f"({order.estimated_delivery:%d/%m/%Y}). Diga ao cliente 'pela data de entrega prevista no pedido', nunca "
+                    "'data de referência'. Se faltarem 2 dias ou menos para o fim do prazo, ou se o cliente discordar, "
+                    "peça a data real em que recebeu o produto."
+                ),
                 **return_windows(order.estimated_delivery, today),
             }
             alerts.append("Para devolução/troca: aplique os prazos de return_windows junto com as regras do manual (search_policies). O canal da compra (online/loja) não consta no sistema: confirme com o cliente se foi online.")
